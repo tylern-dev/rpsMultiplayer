@@ -17,22 +17,76 @@ $(document).ready(function(){
     choice:'',
   }
 
+  var playerOneName = $('#name-1');
+  var playerTwoName = $('#name-2');
+  var rpsBuilder =  $('<button id = "rps-button">');
+  
+
 
 var userListRef = database.ref("users_online");
 var myUserRef = userListRef.push()
+var userKey = myUserRef.key;
+
+
+userListRef.on('value', function(snapshot) {
+  var players = snapshot.val();
+  var playerKey = Object.keys(players);
+  playerOneName.text(players[playerKey[0]].name);
+  playerTwoName.text(players[playerKey[1]].name)
+    
+})
+
+//this is looking to see if client connected or disconnected
+database.ref(".info/connected").on("value", function(snapshot){
+  if(snapshot.val()){
+    myUserRef.onDisconnect().remove();
+    
+  }
+})
+userListRef.on('value', function(snapshot) {
+  var players = snapshot.val();
+  var playerKey = Object.keys(players);
+  playerOneName.text(players[playerKey[0]].name);
+  playerTwoName.text(players[playerKey[1]].name)
+  if(playerKey.length>2){
+    console.log('Please wait for game to finish')
+  } else {
+    console.log('ready to play')
+  }
+})
+
+userListRef.on('child_changed',function(snapshot){
+  console.log(myUserRef.onDisconnect())
+  })
+
+// function playerData(data){
+//   var players = data.val();
+//   var keys = Object.keys(players);
+//   console.log(keys)
+//   for (var i = 0; i < keys.length; i++){
+//     var k = keys[i];
+//     playerOneName.text(players[k].name);
+//     playerTwoName.text(players[k].name);
+    
+
+//     // userObject.name = players[k].name;
+//     // userObject.choice = players[k].choice;
+//     // userObject.wins = players[k].wins;
+//     // userObject.losses = players[k].losses;
+//     // console.log(userObject.name)
+//   }
+// }
+
+
 
 //this is setting the status from the user object to the db
 function setUserStatus(object){
   myUserRef.set(object)
 }
 
-//this is looking to see if client connected or disconnected
-database.ref(".info/connected").on("value", function(snapshot){
-  if(snapshot.val()){
-    myUserRef.onDisconnect().remove();
-    // setUserStatus("online");
-  }
-})
+
+
+
 
 function rps(){
   userObject.choice = 'rock'
@@ -51,7 +105,7 @@ function rps(){
       $('.main').removeClass('hidden');
     })
   }  
-
+  
  
 
   function main(){
